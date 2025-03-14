@@ -21,17 +21,20 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <NotesProvider>
-      <div className="h-screen flex overflow-hidden">
+      <div className="h-screen w-screen flex overflow-hidden bg-background">
+        {/* Sidebar */}
         <Sidebar 
           isMobileSidebarOpen={isMobileSidebarOpen}
           onCloseMobileSidebar={() => setIsMobileSidebarOpen(false)}
         />
         
+        {/* Notes List */}
         <NotesList 
           isMobileNotesListOpen={isMobileNotesListOpen}
           onCloseMobileNotesList={() => setIsMobileNotesListOpen(false)}
         />
         
+        {/* Editor */}
         <div className="flex-1 overflow-hidden">
           <Editor 
             onMobileSidebarToggle={toggleMobileSidebar}

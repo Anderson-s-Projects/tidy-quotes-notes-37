@@ -11,7 +11,8 @@ import {
   Briefcase,
   User,
   LightbulbIcon,
-  Settings
+  Settings,
+  FileTextIcon
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomButton } from "./ui/CustomButton";
@@ -48,6 +49,13 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleFolderClick = (folderId: string) => {
     setSelectedFolderId(folderId);
+    if (window.innerWidth < 768) {
+      onCloseMobileSidebar();
+    }
+  };
+  
+  const handleAllNotesClick = () => {
+    setSelectedFolderId(null);
     if (window.innerWidth < 768) {
       onCloseMobileSidebar();
     }
@@ -90,6 +98,19 @@ const Sidebar: React.FC<SidebarProps> = ({
 
         <div className="flex-1 overflow-auto custom-scrollbar px-3">
           <div className="space-y-6">
+            {/* All Notes Button */}
+            <div 
+              className={cn(
+                "flex items-center py-2 px-2 rounded-md text-sm cursor-pointer mb-2 animate-fade-in",
+                "hover:bg-sidebar-accent hover:text-sidebar-accent-foreground transition-colors duration-200",
+                selectedFolderId === null && "bg-sidebar-accent text-sidebar-accent-foreground font-medium"
+              )}
+              onClick={handleAllNotesClick}
+            >
+              <span className="mr-2"><FileTextIcon size={16} /></span>
+              <span>All Notes</span>
+            </div>
+            
             {/* Folders section */}
             <div>
               <div className="flex items-center justify-between mb-2 px-2">

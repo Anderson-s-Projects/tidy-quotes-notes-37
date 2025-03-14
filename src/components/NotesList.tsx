@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { useNotes } from "@/context/NotesContext";
 import { Note } from "@/types";
 import { format } from "date-fns";
-import { Search, Plus, Filter, SortDesc, ArrowUpDown } from "lucide-react";
+import { Search, Plus, Filter, SortDesc, ArrowUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { CustomButton } from "./ui/CustomButton";
 
@@ -85,13 +85,14 @@ const NotesList: React.FC<NotesListProps> = ({
   return (
     <div 
       className={cn(
-        "flex flex-col bg-background border-r border-border h-full w-72 transition-all duration-300 ease-in-out",
+        "flex flex-col bg-background border-r border-border h-full transition-all duration-300 ease-in-out",
+        "w-full md:w-72 lg:w-80",
         "md:translate-x-0 md:relative",
         isMobileNotesListOpen ? "translate-x-0 absolute inset-y-0 left-0 z-40" : "-translate-x-full"
       )}
     >
-      <div className="p-3 border-b border-border">
-        <div className="relative">
+      <div className="flex justify-between items-center p-3 border-b border-border">
+        <div className="relative flex-1">
           <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
@@ -101,14 +102,18 @@ const NotesList: React.FC<NotesListProps> = ({
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
+        <button 
+          className="md:hidden ml-2 p-1 rounded-md hover:bg-accent"
+          onClick={onCloseMobileNotesList}
+        >
+          <X size={18} />
+        </button>
       </div>
       
       <div className="flex justify-between items-center p-3 border-b border-border">
-        <h2 className="font-semibold text-sm">
+        <h2 className="font-semibold text-sm truncate">
           {selectedFolderId 
-            ? notes.find(n => n.folderId === selectedFolderId)?.folderId.includes('-') 
-              ? `${notes.find(f => f.folderId.startsWith(selectedFolderId.split('-')[0]))?.folderId.split('-')[0] || ''} / ${notes.find(n => n.folderId === selectedFolderId)?.folderId.split('-')[1] || ''}`
-              : notes.find(n => n.folderId === selectedFolderId)?.folderId || 'All Notes'
+            ? folders.find(f => f.id === selectedFolderId)?.name || 'Selected Folder'
             : 'All Notes'
           }
         </h2>
@@ -165,7 +170,7 @@ const NotesList: React.FC<NotesListProps> = ({
                 key={note.id}
                 className={cn(
                   "note-item p-3 cursor-pointer transition-all",
-                  selectedNoteId === note.id ? "active" : "",
+                  selectedNoteId === note.id ? "bg-accent/30" : "hover:bg-accent/10",
                   "animate-slide-in-left"
                 )}
                 style={{ animationDelay: `${index * 50}ms` }}

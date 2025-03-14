@@ -14,6 +14,7 @@ interface NotesContextType {
   setSelectedFolderId: (id: string | null) => void;
   getNote: (id: string) => Note | undefined;
   getNotesInFolder: (folderId: string) => Note[];
+  getAllNotes: () => Note[];
   createNote: (note: Partial<Note>) => void;
   updateNote: (id: string, updates: Partial<Note>) => void;
   deleteNote: (id: string) => void;
@@ -36,6 +37,10 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const getNotesInFolder = (folderId: string) => {
     return notes.filter(note => note.folderId === folderId);
+  };
+  
+  const getAllNotes = () => {
+    return notes;
   };
 
   const createNote = (note: Partial<Note>) => {
@@ -119,6 +124,7 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedFolderId,
         getNote,
         getNotesInFolder,
+        getAllNotes,
         createNote,
         updateNote,
         deleteNote,
