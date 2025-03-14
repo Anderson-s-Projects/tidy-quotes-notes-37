@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNotes } from "@/context/NotesContext";
 import { Note } from "@/types";
@@ -18,6 +17,7 @@ const NotesList: React.FC<NotesListProps> = ({
 }) => {
   const { 
     notes, 
+    folders,
     selectedNoteId, 
     setSelectedNoteId, 
     selectedFolderId,
@@ -72,7 +72,6 @@ const NotesList: React.FC<NotesListProps> = ({
   };
 
   const renderPreview = (content: string) => {
-    // Remove markdown syntax for preview
     return content
       .replace(/#{1,6}\s/g, '')
       .replace(/\*\*(.*?)\*\*/g, '$1')
