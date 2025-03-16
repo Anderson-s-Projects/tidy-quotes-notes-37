@@ -107,8 +107,25 @@ export default {
 				'slide-in-left': 'slide-in-left 0.3s ease-out',
 				'slide-in-right': 'slide-in-right 0.3s ease-out',
 				'scale-in': 'scale-in 0.2s ease-out'
+			},
+			typography: {
+				DEFAULT: {
+					css: {
+						color: 'inherit',
+						a: { color: 'inherit' },
+						strong: { color: 'inherit' },
+						code: { color: 'inherit' },
+						h1: { color: 'inherit' },
+						h2: { color: 'inherit' },
+						h3: { color: 'inherit' },
+						h4: { color: 'inherit' },
+					}
+				}
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		require("@tailwindcss/typography")
+	],
 } satisfies Config;
