@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -266,6 +267,33 @@
     .neu-card {
       @apply p-3;
     }
+  }
+  
+  /* Code editor styles */
+  .code-editor-container {
+    @apply flex flex-col md:flex-row h-full;
+  }
+  
+  .code-editor {
+    @apply font-mono text-sm;
+  }
+  
+  .code-preview {
+    @apply rounded-xl overflow-hidden border border-border;
+  }
+  
+  /* Full screen styles */
+  :fullscreen .neu-flat,
+  :-webkit-full-screen .neu-flat,
+  :-ms-fullscreen .neu-flat {
+    @apply rounded-none;
+    box-shadow: none;
+  }
+  
+  :fullscreen .editor-container,
+  :-webkit-full-screen .editor-container,
+  :-ms-fullscreen .editor-container {
+    @apply p-4 bg-background;
   }
 }
 

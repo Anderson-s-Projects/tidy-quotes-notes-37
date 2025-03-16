@@ -1,9 +1,11 @@
+
 import React, { useEffect, useRef, useState } from "react";
 import { useNotes } from "@/context/NotesContext";
 import { formatMarkdown, insertTab } from "@/utils/markdown";
-import { Bold, Italic, Heading1, Heading2, Heading3, Link, List, ListOrdered, Code, Quote, Eye, Save, Trash2, Clock, FileText, Menu, FileIcon, Maximize, Minimize } from "lucide-react";
+import { Bold, Italic, Heading1, Heading2, Heading3, Link, List, ListOrdered, Code, Quote, Eye, Save, Trash2, Clock, FileText, Menu, FileIcon, Maximize, Minimize, Globe, Play } from "lucide-react";
 import { CustomButton } from "./ui/CustomButton";
 import { toast } from "sonner";
+import CodeEditor from "./CodeEditor";
 
 interface EditorProps {
   onMobileSidebarToggle: () => void;
@@ -27,11 +29,14 @@ const Editor: React.FC<EditorProps> = ({
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [isPreviewMode, setIsPreviewMode] = useState(false);
+  const [isCodeMode, setIsCodeMode] = useState(false);
   const [wordCount, setWordCount] = useState(0);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSaved, setLastSaved] = useState<Date | null>(null);
+  const [codeLanguage, setCodeLanguage] = useState<"html" | "css" | "javascript">("html");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const previewRef = useRef<HTMLIFrameElement>(null);
 
   useEffect(() => {
     if (selectedNoteId) {
@@ -41,12 +46,25 @@ const Editor: React.FC<EditorProps> = ({
         setContent(note.content);
         setWordCount(countWords(note.content));
         setLastSaved(note.updatedAt);
+        
+        // Detect if note contains code
+        if (note.title.toLowerCase().includes('.html') || 
+            note.title.toLowerCase().includes('.css') || 
+            note.title.toLowerCase().includes('.js')) {
+          setIsCodeMode(true);
+          if (note.title.toLowerCase().includes('.html')) setCodeLanguage("html");
+          else if (note.title.toLowerCase().includes('.css')) setCodeLanguage("css");
+          else if (note.title.toLowerCase().includes('.js')) setCodeLanguage("javascript");
+        } else {
+          setIsCodeMode(false);
+        }
       }
     } else {
       setTitle("");
       setContent("");
       setWordCount(0);
       setLastSaved(null);
+      setIsCodeMode(false);
     }
   }, [selectedNoteId, getNote]);
 
@@ -58,13 +76,104 @@ const Editor: React.FC<EditorProps> = ({
     };
   }, []);
 
+  // Effect to update preview when in code mode
+  useEffect(() => {
+    if (isCodeMode && isPreviewMode && previewRef.current) {
+      updateCodePreview();
+    }
+  }, [content, isCodeMode, isPreviewMode, codeLanguage]);
+
+  const updateCodePreview = () => {
+    if (!previewRef.current) return;
+
+    const iframe = previewRef.current;
+    const iframeDoc = iframe.contentDocument || iframe.contentWindow?.document;
+    
+    if (!iframeDoc) return;
+    
+    let htmlContent = "";
+    
+    if (codeLanguage === "html") {
+      htmlContent = content;
+    } else if (codeLanguage === "css") {
+      htmlContent = `
+        <html>
+          <head>
+            <style>${content}</style>
+          </head>
+          <body>
+            <div class="demo-element">CSS Preview</div>
+            <div class="demo-paragraph">This is a paragraph to demonstrate your CSS.</div>
+            <button class="demo-button">Button Element</button>
+            <a href="#" class="demo-link">Link Element</a>
+          </body>
+        </html>
+      `;
+    } else if (codeLanguage === "javascript") {
+      htmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: system-ui, sans-serif; padding: 20px; }
+              #output { border: 1px solid #ddd; padding: 15px; margin-top: 20px; min-height: 100px; }
+            </style>
+          </head>
+          <body>
+            <h4>JavaScript Preview</h4>
+            <div>Open the console (F12) to see output</div>
+            <div id="output">Output will appear here</div>
+            <script>
+              // Redirect console.log to the output div
+              const originalLog = console.log;
+              console.log = function(...args) {
+                originalLog.apply(console, args);
+                const output = document.getElementById('output');
+                if (output) {
+                  const text = args.map(arg => 
+                    typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                  ).join(' ');
+                  output.innerHTML += '<div>' + text + '</div>';
+                }
+              };
+              
+              // Run the user code
+              try {
+                ${content}
+              } catch (error) {
+                console.log('Error: ' + error.message);
+              }
+            </script>
+          </body>
+        </html>
+      `;
+    }
+    
+    iframeDoc.open();
+    iframeDoc.write(htmlContent);
+    iframeDoc.close();
+  };
+
   const countWords = (text: string) => {
     return text.trim().split(/\s+/).filter(Boolean).length;
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTitle(e.target.value);
-    scheduleSave(e.target.value, content);
+    const newTitle = e.target.value;
+    setTitle(newTitle);
+    
+    // Auto-detect code mode based on file extension in the title
+    if (newTitle.toLowerCase().includes('.html')) {
+      setIsCodeMode(true);
+      setCodeLanguage("html");
+    } else if (newTitle.toLowerCase().includes('.css')) {
+      setIsCodeMode(true);
+      setCodeLanguage("css");
+    } else if (newTitle.toLowerCase().includes('.js')) {
+      setIsCodeMode(true);
+      setCodeLanguage("javascript");
+    }
+    
+    scheduleSave(newTitle, content);
   };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -72,6 +181,11 @@ const Editor: React.FC<EditorProps> = ({
     setContent(newContent);
     setWordCount(countWords(newContent));
     scheduleSave(title, newContent);
+  };
+
+  const handleCodeChange = (value: string) => {
+    setContent(value);
+    scheduleSave(title, value);
   };
 
   const scheduleSave = (newTitle: string, newContent: string) => {
@@ -190,7 +304,7 @@ const Editor: React.FC<EditorProps> = ({
     return html;
   };
 
-  return <div className={`flex flex-col h-full relative neu-flat m-2 md:m-0 rounded-lg ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none' : ''}`}>
+  return <div className={`flex flex-col h-full relative neu-flat m-2 md:m-0 rounded-lg ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none bg-background' : ''}`}>
       {!selectedNoteId ? <div className="flex items-center justify-center h-full">
           <div className="text-center space-y-4 p-6 neu-card max-w-md">
             <FileText size={48} className="mx-auto text-muted-foreground opacity-50" />
@@ -222,41 +336,76 @@ const Editor: React.FC<EditorProps> = ({
             
             <div className="flex-1 flex items-center justify-between ml-2 md:ml-0">
               <div className="flex items-center flex-wrap gap-1">
-                <button onClick={() => handleFormat("bold")} className="toolbar-button neu-button" title="Bold">
-                  <Bold size={15} />
-                </button>
-                <button onClick={() => handleFormat("italic")} className="toolbar-button neu-button" title="Italic">
-                  <Italic size={15} />
-                </button>
-                <button onClick={() => handleFormat("heading1")} className="toolbar-button neu-button" title="Heading 1">
-                  <Heading1 size={15} />
-                </button>
-                <button onClick={() => handleFormat("heading2")} className="toolbar-button neu-button" title="Heading 2">
-                  <Heading2 size={15} />
-                </button>
-                <button onClick={() => handleFormat("heading3")} className="toolbar-button neu-button" title="Heading 3">
-                  <Heading3 size={15} />
-                </button>
-                <button onClick={() => handleFormat("link")} className="toolbar-button neu-button" title="Link">
-                  <Link size={15} />
-                </button>
-                <button onClick={() => handleFormat("unorderedList")} className="toolbar-button neu-button" title="Bullet List">
-                  <List size={15} />
-                </button>
-                <button onClick={() => handleFormat("orderedList")} className="toolbar-button neu-button" title="Numbered List">
-                  <ListOrdered size={15} />
-                </button>
-                <button onClick={() => handleFormat("code")} className="toolbar-button neu-button" title="Code">
-                  <Code size={15} />
-                </button>
-                <button onClick={() => handleFormat("quote")} className="toolbar-button neu-button" title="Quote">
-                  <Quote size={15} />
-                </button>
+                {isCodeMode ? (
+                  <>
+                    <button 
+                      onClick={() => setCodeLanguage("html")} 
+                      className={`px-2 py-1 text-xs rounded-lg ${codeLanguage === "html" ? 'neu-pressed' : 'neu-button'}`}
+                    >
+                      HTML
+                    </button>
+                    <button 
+                      onClick={() => setCodeLanguage("css")} 
+                      className={`px-2 py-1 text-xs rounded-lg ${codeLanguage === "css" ? 'neu-pressed' : 'neu-button'}`}
+                    >
+                      CSS
+                    </button>
+                    <button 
+                      onClick={() => setCodeLanguage("javascript")} 
+                      className={`px-2 py-1 text-xs rounded-lg ${codeLanguage === "javascript" ? 'neu-pressed' : 'neu-button'}`}
+                    >
+                      JS
+                    </button>
+                    <button onClick={() => setIsCodeMode(false)} className="px-2 py-1 text-xs rounded-lg neu-button">
+                      Text Mode
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={() => handleFormat("bold")} className="toolbar-button neu-button" title="Bold">
+                      <Bold size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("italic")} className="toolbar-button neu-button" title="Italic">
+                      <Italic size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("heading1")} className="toolbar-button neu-button" title="Heading 1">
+                      <Heading1 size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("heading2")} className="toolbar-button neu-button" title="Heading 2">
+                      <Heading2 size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("heading3")} className="toolbar-button neu-button" title="Heading 3">
+                      <Heading3 size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("link")} className="toolbar-button neu-button" title="Link">
+                      <Link size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("unorderedList")} className="toolbar-button neu-button" title="Bullet List">
+                      <List size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("orderedList")} className="toolbar-button neu-button" title="Numbered List">
+                      <ListOrdered size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("code")} className="toolbar-button neu-button" title="Code">
+                      <Code size={15} />
+                    </button>
+                    <button onClick={() => handleFormat("quote")} className="toolbar-button neu-button" title="Quote">
+                      <Quote size={15} />
+                    </button>
+                    <button onClick={() => setIsCodeMode(true)} className="px-2 py-1 text-xs rounded-lg neu-button">
+                      Code Mode
+                    </button>
+                  </>
+                )}
               </div>
 
               <div className="flex items-center gap-2">
-                <button onClick={() => setIsPreviewMode(!isPreviewMode)} className={`toolbar-button ${isPreviewMode ? 'neu-pressed' : 'neu-button'}`} title="Toggle Preview Mode">
-                  <Eye size={15} />
+                <button 
+                  onClick={() => setIsPreviewMode(!isPreviewMode)} 
+                  className={`toolbar-button ${isPreviewMode ? 'neu-pressed' : 'neu-button'}`} 
+                  title={isCodeMode ? "Toggle Live Preview" : "Toggle Preview Mode"}
+                >
+                  {isCodeMode ? <Globe size={15} /> : <Eye size={15} />}
                 </button>
                 {toggleFullScreen && (
                   <button onClick={toggleFullScreen} className="toolbar-button neu-button" title={isFullScreen ? 'Exit Full Screen' : 'Full Screen Mode'}>
@@ -272,15 +421,38 @@ const Editor: React.FC<EditorProps> = ({
               type="text" 
               value={title} 
               onChange={handleTitleChange} 
-              placeholder="Note title..." 
+              placeholder={isCodeMode ? "Filename (e.g. index.html, styles.css, script.js)" : "Note title..."} 
               className="w-full text-xl font-medium bg-transparent border-none outline-none focus:ring-0 px-2 py-1 rounded-lg" 
             />
           </div>
 
           <div className="flex-1 overflow-hidden editor-container p-2">
-            {isPreviewMode ? (
+            {isCodeMode ? (
+              <div className="h-full flex flex-col md:flex-row">
+                <div className={`${isPreviewMode ? 'md:w-1/2 h-1/2 md:h-full' : 'w-full h-full'}`}>
+                  <CodeEditor 
+                    value={content}
+                    onChange={handleCodeChange}
+                    language={codeLanguage}
+                    className="h-full w-full neu-input p-0 overflow-auto"
+                  />
+                </div>
+                {isPreviewMode && (
+                  <div className="md:w-1/2 h-1/2 md:h-full md:pl-2 pt-2 md:pt-0">
+                    <div className="h-full neu-card p-0 overflow-hidden">
+                      <iframe
+                        ref={previewRef}
+                        title="Code Preview"
+                        className="w-full h-full border-none"
+                        sandbox="allow-scripts"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+            ) : isPreviewMode ? (
               <div 
-                className="editor-content custom-scrollbar prose prose-sm max-w-none note-content p-4 neu-card h-full overflow-auto" 
+                className="editor-content custom-scrollbar note-content p-4 neu-card h-full overflow-auto" 
                 dangerouslySetInnerHTML={{ __html: renderMarkdown(content) }} 
               />
             ) : (
@@ -305,7 +477,7 @@ const Editor: React.FC<EditorProps> = ({
             </div>
 
             <div className="flex items-center gap-3">
-              <span>{wordCount} words</span>
+              {!isCodeMode && <span>{wordCount} words</span>}
               
               <div className="flex items-center gap-1">
                 <button onClick={handleSave} className="h-7 px-2 rounded-lg neu-button flex items-center text-xs">
