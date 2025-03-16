@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -92,8 +93,10 @@
 
   [data-panel-group-direction="horizontal"] > [data-panel-handle] {
     width: 6px;
+    margin: 0;
     background-color: var(--border);
     transition: background-color 0.15s;
+    z-index: 10;
   }
 
   [data-panel-group-direction="horizontal"] > [data-panel-handle]:hover,
@@ -107,6 +110,16 @@
     justify-content: center;
     padding: 0 4px;
   }
+  
+  .fullscreen-enabled .editor-container,
+  .fullscreen-enabled .editor-content {
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    padding: 2rem;
+    background-color: hsl(var(--background));
+  }
 }
 
 @layer base {
@@ -116,12 +129,26 @@
   body {
     @apply bg-background text-foreground;
     font-feature-settings: "rlig" 1, "calt" 1;
+    overflow-x: hidden;
   }
   
   html, body, #root {
     height: 100%;
     width: 100%;
     overflow: hidden;
+  }
+  
+  @media (max-width: 768px) {
+    body {
+      overflow: auto;
+      height: 100%;
+    }
+    
+    #root {
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
   }
 }
 
@@ -148,8 +175,7 @@
   }
   
   .editor-content {
-    @apply px-4 py-2 h-full;
-    width: 100%;
+    @apply px-4 py-2 h-full w-full;
     max-width: none;
   }
   
@@ -222,6 +248,15 @@
   
   .dark .neu-card {
     box-shadow: var(--shadow-medium-dark);
+  }
+  
+  .sidebar-toggle-button {
+    @apply absolute top-1/2 -right-3 transform -translate-y-1/2 bg-background rounded-full h-6 w-6 flex items-center justify-center z-10;
+    box-shadow: var(--shadow-small-light);
+  }
+  
+  .dark .sidebar-toggle-button {
+    box-shadow: var(--shadow-small-dark);
   }
 }
 
