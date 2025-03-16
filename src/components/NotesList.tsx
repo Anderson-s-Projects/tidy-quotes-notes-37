@@ -1,10 +1,9 @@
+
 import React, { useState } from "react";
 import { useNotes } from "@/context/NotesContext";
-import { Note } from "@/types";
 import { format } from "date-fns";
 import { Search, Plus, Filter, SortDesc, ArrowUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CustomButton } from "./ui/CustomButton";
 
 interface NotesListProps {
   isMobileNotesListOpen: boolean;
@@ -84,10 +83,10 @@ const NotesList: React.FC<NotesListProps> = ({
   return (
     <div 
       className={cn(
-        "flex flex-col bg-background border-r border-border h-full transition-all duration-300 ease-in-out",
-        "w-full md:w-72 lg:w-80",
+        "flex flex-col h-full transition-all duration-300 ease-in-out neu-flat",
+        "w-full md:w-72 lg:w-80 mr-2 md:mr-3",
         "md:translate-x-0 md:relative",
-        isMobileNotesListOpen ? "translate-x-0 absolute inset-y-0 left-0 z-40" : "-translate-x-full"
+        isMobileNotesListOpen ? "translate-x-0 absolute inset-y-0 left-0 z-40 m-2" : "-translate-x-full"
       )}
     >
       <div className="flex justify-between items-center p-3 border-b border-border">
@@ -96,13 +95,13 @@ const NotesList: React.FC<NotesListProps> = ({
           <input
             type="text"
             placeholder="Search notes..."
-            className="w-full h-9 pl-9 pr-3 rounded-md bg-secondary/50 border border-border text-sm focus:outline-none focus:ring-1 focus:ring-ring transition-all"
+            className="w-full h-9 pl-9 pr-3 rounded-lg bg-background text-sm focus:outline-none neu-input"
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
         <button 
-          className="md:hidden ml-2 p-1 rounded-md hover:bg-accent"
+          className="md:hidden ml-2 p-1 rounded-lg neu-button"
           onClick={onCloseMobileNotesList}
         >
           <X size={18} />
@@ -117,35 +116,29 @@ const NotesList: React.FC<NotesListProps> = ({
           }
         </h2>
         <div className="flex gap-1">
-          <CustomButton
-            variant="ghost"
-            size="sm"
+          <button
             onClick={toggleSortOrder}
-            className="h-7 w-7 p-0 rounded-full"
+            className="h-7 w-7 rounded-full neu-button flex items-center justify-center"
             title={`Sort by ${sortOrder === 'newest' ? 'oldest first' : sortOrder === 'oldest' ? 'alphabetical' : 'newest first'}`}
           >
             {sortOrder === 'alphabetical' ? <ArrowUpDown size={14} /> : <SortDesc size={14} />}
             <span className="sr-only">Sort</span>
-          </CustomButton>
-          <CustomButton
-            variant="ghost"
-            size="sm"
-            className="h-7 w-7 p-0 rounded-full"
+          </button>
+          <button
+            className="h-7 w-7 rounded-full neu-button flex items-center justify-center"
             title="Filter notes"
           >
             <Filter size={14} />
             <span className="sr-only">Filter</span>
-          </CustomButton>
-          <CustomButton
-            variant="ghost"
-            size="sm"
+          </button>
+          <button
             onClick={handleCreateNote}
-            className="h-7 w-7 p-0 rounded-full bg-primary/10 hover:bg-primary/20"
+            className="h-7 w-7 rounded-full neu-button flex items-center justify-center"
             title="Create new note"
           >
-            <Plus size={14} className="text-primary" />
+            <Plus size={14} />
             <span className="sr-only">New Note</span>
-          </CustomButton>
+          </button>
         </div>
       </div>
       
@@ -153,23 +146,21 @@ const NotesList: React.FC<NotesListProps> = ({
         {filteredNotes.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-center p-4">
             <p className="text-muted-foreground text-sm mb-3">No notes found</p>
-            <CustomButton 
-              variant="outline" 
-              size="sm" 
+            <button 
               onClick={handleCreateNote}
-              className="flex items-center gap-1"
+              className="flex items-center gap-1 py-2 px-3 rounded-lg neu-button"
             >
               <Plus size={14} /> Create New Note
-            </CustomButton>
+            </button>
           </div>
         ) : (
-          <div className="divide-y divide-border">
+          <div className="p-2 space-y-2">
             {filteredNotes.map((note, index) => (
               <div 
                 key={note.id}
                 className={cn(
-                  "note-item p-3 cursor-pointer transition-all",
-                  selectedNoteId === note.id ? "bg-accent/30" : "hover:bg-accent/10",
+                  "p-3 cursor-pointer transition-all rounded-lg",
+                  selectedNoteId === note.id ? "neu-pressed" : "neu-button",
                   "animate-slide-in-left"
                 )}
                 style={{ animationDelay: `${index * 50}ms` }}
@@ -186,7 +177,7 @@ const NotesList: React.FC<NotesListProps> = ({
                     </span>
                     {note.tags.length > 0 && (
                       <span 
-                        className="tag"
+                        className="tag px-2 py-0.5 rounded-full"
                         style={{ backgroundColor: `${note.tags[0].color}20`, color: note.tags[0].color }}
                       >
                         {note.tags[0].name}
