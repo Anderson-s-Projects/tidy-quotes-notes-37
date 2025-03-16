@@ -1,6 +1,7 @@
 
 import React, { useState } from "react";
 import { useNotes } from "@/context/NotesContext";
+import { useMobileNav } from "@/context/MobileNavContext";
 import { format } from "date-fns";
 import { Search, Plus, Filter, SortDesc, ArrowUpDown, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -14,6 +15,7 @@ const NotesList: React.FC<NotesListProps> = ({
   isMobileNotesListOpen,
   onCloseMobileNotesList
 }) => {
+  const { isMobile } = useMobileNav();
   const { 
     notes, 
     folders,
@@ -47,7 +49,7 @@ const NotesList: React.FC<NotesListProps> = ({
 
   const handleNoteClick = (noteId: string) => {
     setSelectedNoteId(noteId);
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       onCloseMobileNotesList();
     }
   };
@@ -83,10 +85,14 @@ const NotesList: React.FC<NotesListProps> = ({
   return (
     <div 
       className={cn(
-        "flex flex-col h-full transition-all duration-300 ease-in-out neu-flat",
-        "w-full md:w-72 lg:w-80 mr-2 md:mr-3",
+        "flex flex-col transition-all duration-300 ease-in-out neu-flat",
+        "md:h-full md:w-72 lg:w-80 md:mr-2 md:m-0",
         "md:translate-x-0 md:relative",
-        isMobileNotesListOpen ? "translate-x-0 absolute inset-y-0 left-0 z-40 m-2" : "-translate-x-full"
+        isMobile ? (
+          isMobileNotesListOpen 
+            ? "fixed inset-y-0 right-0 z-40 w-[280px] m-0 h-full rounded-none" 
+            : "hidden"
+        ) : ""
       )}
     >
       <div className="flex justify-between items-center p-3 border-b border-border">
@@ -100,12 +106,15 @@ const NotesList: React.FC<NotesListProps> = ({
             onChange={e => setSearchTerm(e.target.value)}
           />
         </div>
-        <button 
-          className="md:hidden ml-2 p-1 rounded-lg neu-button"
-          onClick={onCloseMobileNotesList}
-        >
-          <X size={18} />
-        </button>
+        {isMobile && (
+          <button 
+            className="ml-2 p-1 rounded-lg neu-button"
+            onClick={onCloseMobileNotesList}
+            aria-label="Close notes list"
+          >
+            <X size={18} />
+          </button>
+        )}
       </div>
       
       <div className="flex justify-between items-center p-3 border-b border-border">
@@ -120,24 +129,24 @@ const NotesList: React.FC<NotesListProps> = ({
             onClick={toggleSortOrder}
             className="h-7 w-7 rounded-full neu-button flex items-center justify-center"
             title={`Sort by ${sortOrder === 'newest' ? 'oldest first' : sortOrder === 'oldest' ? 'alphabetical' : 'newest first'}`}
+            aria-label="Change sort order"
           >
             {sortOrder === 'alphabetical' ? <ArrowUpDown size={14} /> : <SortDesc size={14} />}
-            <span className="sr-only">Sort</span>
           </button>
           <button
             className="h-7 w-7 rounded-full neu-button flex items-center justify-center"
             title="Filter notes"
+            aria-label="Filter notes"
           >
             <Filter size={14} />
-            <span className="sr-only">Filter</span>
           </button>
           <button
             onClick={handleCreateNote}
             className="h-7 w-7 rounded-full neu-button flex items-center justify-center"
             title="Create new note"
+            aria-label="Create new note"
           >
             <Plus size={14} />
-            <span className="sr-only">New Note</span>
           </button>
         </div>
       </div>

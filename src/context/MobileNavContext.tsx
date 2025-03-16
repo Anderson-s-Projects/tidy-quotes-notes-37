@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 
 interface MobileNavContextType {
   isSidebarOpen: boolean;
@@ -7,6 +7,7 @@ interface MobileNavContextType {
   openSidebar: () => void;
   openNotesList: () => void;
   closePanels: () => void;
+  isMobile: boolean;
 }
 
 const MobileNavContext = createContext<MobileNavContextType | undefined>(undefined);
@@ -14,6 +15,21 @@ const MobileNavContext = createContext<MobileNavContextType | undefined>(undefin
 export const MobileNavProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotesListOpen, setIsNotesListOpen] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+
+  // Check if device is mobile
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIfMobile);
+    };
+  }, []);
 
   const openSidebar = () => {
     setIsSidebarOpen(true);
@@ -38,6 +54,7 @@ export const MobileNavProvider: React.FC<{ children: React.ReactNode }> = ({ chi
         openSidebar,
         openNotesList,
         closePanels,
+        isMobile
       }}
     >
       {children}

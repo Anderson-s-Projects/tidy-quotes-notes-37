@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -180,7 +179,6 @@
   }
   
   .note-content {
-    @apply prose prose-sm max-w-none;
     width: 100%;
   }
   
@@ -257,6 +255,17 @@
   
   .dark .sidebar-toggle-button {
     box-shadow: var(--shadow-small-dark);
+  }
+
+  /* Mobile specific styles */
+  @media (max-width: 768px) {
+    .editor-content {
+      @apply px-3 py-2;
+    }
+    
+    .neu-card {
+      @apply p-3;
+    }
   }
 }
 

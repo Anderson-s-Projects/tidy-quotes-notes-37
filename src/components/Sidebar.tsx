@@ -12,10 +12,11 @@ import {
   User,
   LightbulbIcon,
   Settings,
-  FileTextIcon
+  FileTextIcon,
+  X
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { CustomButton } from "./ui/CustomButton";
+import { useMobileNav } from "@/context/MobileNavContext";
 import { toast } from "sonner";
 
 interface SidebarProps {
@@ -27,6 +28,7 @@ const Sidebar: React.FC<SidebarProps> = ({
   isMobileSidebarOpen,
   onCloseMobileSidebar
 }) => {
+  const { isMobile } = useMobileNav();
   const { 
     folders, 
     tags, 
@@ -49,14 +51,14 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleFolderClick = (folderId: string) => {
     setSelectedFolderId(folderId);
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       onCloseMobileSidebar();
     }
   };
   
   const handleAllNotesClick = () => {
     setSelectedFolderId(null);
-    if (window.innerWidth < 768) {
+    if (isMobile) {
       onCloseMobileSidebar();
     }
   };
@@ -70,6 +72,9 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   const handleTagClick = (tagId: string) => {
     toast.info(`Tag filter not implemented yet`);
+    if (isMobile) {
+      onCloseMobileSidebar();
+    }
   };
 
   const iconMap = {
@@ -85,19 +90,31 @@ const Sidebar: React.FC<SidebarProps> = ({
   return (
     <div 
       className={cn(
-        "flex flex-col h-full w-64 transition-all duration-300 ease-in-out neu-flat",
-        "md:translate-x-0 md:relative mr-2 md:mr-3",
-        isMobileSidebarOpen ? "translate-x-0 absolute inset-y-0 left-0 z-50 m-2" : "-translate-x-full"
+        "flex flex-col transition-all duration-300 ease-in-out neu-flat",
+        "md:h-full md:w-64 md:translate-x-0 md:relative md:mr-2 md:m-0",
+        isMobile ? (
+          isMobileSidebarOpen 
+            ? "fixed inset-y-0 left-0 z-50 w-[280px] m-0 h-full rounded-none" 
+            : "hidden"
+        ) : ""
       )}
     >
       <div className="flex flex-col h-full overflow-hidden">
-        <div className="p-4">
-          <h1 className="text-xl font-semibold tracking-tight mb-1">Notes</h1>
-          <p className="text-xs text-muted-foreground">Capture your thoughts elegantly</p>
+        <div className="flex justify-between items-center p-4 border-b border-border">
+          <h1 className="text-xl font-semibold tracking-tight">Notes</h1>
+          {isMobile && (
+            <button 
+              onClick={onCloseMobileSidebar}
+              className="p-1 rounded-full neu-button"
+              aria-label="Close sidebar"
+            >
+              <X size={20} />
+            </button>
+          )}
         </div>
 
         <div className="flex-1 overflow-auto custom-scrollbar px-3">
-          <div className="space-y-6">
+          <div className="space-y-6 py-4">
             {/* All Notes Button */}
             <div 
               className={cn(
@@ -118,9 +135,9 @@ const Sidebar: React.FC<SidebarProps> = ({
                 <button 
                   onClick={handleAddFolder}
                   className="h-6 w-6 p-0 rounded-full neu-button flex items-center justify-center"
+                  aria-label="Add Folder"
                 >
                   <Plus size={14} />
-                  <span className="sr-only">Add Folder</span>
                 </button>
               </div>
 
@@ -141,6 +158,7 @@ const Sidebar: React.FC<SidebarProps> = ({
                             e.stopPropagation();
                             toggleFolder(folder.id);
                           }}
+                          aria-label={expandedFolders[folder.id] ? "Collapse folder" : "Expand folder"}
                         >
                           {expandedFolders[folder.id] ? (
                             <ChevronDown size={14} />
@@ -195,8 +213,8 @@ const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
 
-            {/* Quote widget */}
-            <div className="pb-4 px-2">
+            {/* Quote widget - only show on larger screens */}
+            <div className="hidden md:block pb-4 px-2">
               <div className="neu-card">
                 <QuoteWidget />
               </div>
@@ -204,7 +222,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           </div>
         </div>
 
-        <div className="p-4 border-t border-border flex items-center">
+        <div className="p-4 border-t border-border">
           <button 
             className="w-full justify-start text-muted-foreground hover:text-foreground transition-colors flex items-center py-2 px-3 rounded-lg neu-button"
           >

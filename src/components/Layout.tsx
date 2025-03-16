@@ -48,13 +48,13 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <NotesProvider>
-      <div className={`h-full w-full flex overflow-hidden bg-background ${isFullScreen ? 'fixed inset-0 z-50' : ''}`}>
-        {/* Resizable layout for desktop */}
+      <div className="h-full w-full flex flex-col md:flex-row overflow-hidden bg-background">
+        {/* Desktop layout */}
         <div className="hidden md:flex h-full w-full">
           <ResizablePanelGroup direction="horizontal" className="h-full w-full">
             {/* Sidebar Panel */}
             {!collapsedSidebar ? (
-              <ResizablePanel defaultSize={20} minSize={15}>
+              <ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
                 <div className="relative h-full">
                   <Sidebar 
                     isMobileSidebarOpen={isSidebarOpen}
@@ -62,7 +62,8 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
                   />
                   <button 
                     onClick={toggleSidebar}
-                    className="absolute top-1/2 -right-3 transform -translate-y-1/2 bg-background rounded-full h-6 w-6 flex items-center justify-center z-10 shadow"
+                    className="sidebar-toggle-button"
+                    aria-label="Toggle sidebar"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M15 18l-6-6 6-6" />
@@ -74,7 +75,8 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               <div className="relative">
                 <button 
                   onClick={toggleSidebar}
-                  className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-background rounded-full h-6 w-6 flex items-center justify-center z-10 shadow"
+                  className="absolute top-4 left-2 bg-background rounded-full h-8 w-8 flex items-center justify-center z-10 shadow"
+                  aria-label="Show sidebar"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6" />
@@ -87,7 +89,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
             
             {/* Notes List Panel */}
             {!collapsedNotesList ? (
-              <ResizablePanel defaultSize={30} minSize={20}>
+              <ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
                 <div className="relative h-full">
                   <NotesList 
                     isMobileNotesListOpen={isNotesListOpen}
@@ -95,7 +97,8 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
                   />
                   <button 
                     onClick={toggleNotesList}
-                    className="absolute top-1/2 -right-3 transform -translate-y-1/2 bg-background rounded-full h-6 w-6 flex items-center justify-center z-10 shadow"
+                    className="sidebar-toggle-button"
+                    aria-label="Toggle notes list"
                   >
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d="M15 18l-6-6 6-6" />
@@ -107,7 +110,8 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               <div className="relative">
                 <button 
                   onClick={toggleNotesList}
-                  className="absolute top-1/2 right-0 transform -translate-y-1/2 bg-background rounded-full h-6 w-6 flex items-center justify-center z-10 shadow"
+                  className="absolute top-4 left-2 bg-background rounded-full h-8 w-8 flex items-center justify-center z-10 shadow"
+                  aria-label="Show notes list"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 18l6-6-6-6" />
@@ -130,8 +134,44 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
           </ResizablePanelGroup>
         </div>
 
-        {/* Mobile layout */}
-        <div className="md:hidden flex w-full h-full">
+        {/* Mobile layout - Separate drawer approach */}
+        <div className="md:hidden flex flex-col h-full w-full">
+          {/* Mobile header with buttons */}
+          <div className="flex justify-between items-center p-2 border-b border-border">
+            <button 
+              onClick={openSidebar}
+              className="h-9 w-9 neu-button flex items-center justify-center rounded-full"
+              aria-label="Open sidebar"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 12h18"></path>
+                <path d="M3 6h18"></path>
+                <path d="M3 18h18"></path>
+              </svg>
+            </button>
+            <h1 className="text-lg font-semibold">Notes</h1>
+            <button 
+              onClick={openNotesList}
+              className="h-9 w-9 neu-button flex items-center justify-center rounded-full"
+              aria-label="Open notes list"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+              </svg>
+            </button>
+          </div>
+
+          {/* Main content area */}
+          <div className="flex-1 overflow-hidden">
+            <Editor 
+              onMobileSidebarToggle={openSidebar}
+              onMobileNotesListToggle={openNotesList}
+              isFullScreen={isFullScreen}
+              toggleFullScreen={toggleFullScreen}
+            />
+          </div>
+          
           {/* Sidebar */}
           <Sidebar 
             isMobileSidebarOpen={isSidebarOpen}
@@ -143,16 +183,6 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
             isMobileNotesListOpen={isNotesListOpen}
             onCloseMobileNotesList={closePanels}
           />
-          
-          {/* Editor */}
-          <div className="flex-1 overflow-hidden">
-            <Editor 
-              onMobileSidebarToggle={openSidebar}
-              onMobileNotesListToggle={openNotesList}
-              isFullScreen={isFullScreen}
-              toggleFullScreen={toggleFullScreen}
-            />
-          </div>
         </div>
 
         {/* Overlay for mobile when sidebar or notes list is open */}
