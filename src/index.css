@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -294,6 +293,38 @@
   :-webkit-full-screen .editor-container,
   :-ms-fullscreen .editor-container {
     @apply p-4 bg-background;
+  }
+  
+  /* Adding fullscreen specific styling to match app's aesthetics */
+  .fullscreen-enabled {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+  }
+  
+  .fullscreen-enabled .editor-container {
+    background-color: hsl(var(--background));
+    box-shadow: none;
+    border-radius: 0;
+  }
+  
+  .fullscreen-enabled .editor-content {
+    background-color: hsl(var(--background));
+  }
+  
+  .fullscreen-enabled .neu-input,
+  .fullscreen-enabled .neu-card,
+  .fullscreen-enabled .neu-button,
+  .fullscreen-enabled .neu-flat,
+  .fullscreen-enabled .neu-pressed {
+    box-shadow: none;
+    background-color: hsl(var(--background));
+    border: 1px solid hsl(var(--border));
+  }
+  
+  /* Adjusting toolbar in fullscreen */
+  .fullscreen-enabled .toolbar-button {
+    @apply bg-secondary text-foreground hover:bg-secondary/80;
+    box-shadow: none;
   }
 }
 
