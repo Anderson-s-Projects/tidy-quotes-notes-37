@@ -1,11 +1,18 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { useNotes } from "@/context/NotesContext";
-import { formatMarkdown, insertTab } from "@/utils/markdown";
-import { Bold, Italic, Heading1, Heading2, Heading3, Link, List, ListOrdered, Code, Quote, Eye, Save, Trash2, Clock, FileText, Menu, FileIcon, Maximize, Minimize, Globe, Play } from "lucide-react";
+import { formatMarkdown, insertTab, downloadNote } from "@/utils/markdown";
+import { 
+  Bold, Italic, Heading1, Heading2, Heading3, Link, List, 
+  ListOrdered, Code, Quote, Eye, Save, Trash2, Clock, 
+  FileText, Menu, FileIcon, Maximize, Minimize, Globe, 
+  Play, Download, Tag
+} from "lucide-react";
 import { CustomButton } from "./ui/CustomButton";
 import { toast } from "sonner";
 import CodeEditor from "./CodeEditor";
+import TagManager from "./TagManager";
+import { ToggleGroup, ToggleGroupItem } from "./ui/toggle-group";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
 
 interface EditorProps {
   onMobileSidebarToggle: () => void;
@@ -37,6 +44,8 @@ const Editor: React.FC<EditorProps> = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previewRef = useRef<HTMLIFrameElement>(null);
+  const [showTagManager, setShowTagManager] = useState(false);
+  const [downloadFormat, setDownloadFormat] = useState<"txt" | "md" | "html">("txt");
 
   useEffect(() => {
     if (selectedNoteId) {
@@ -47,7 +56,6 @@ const Editor: React.FC<EditorProps> = ({
         setWordCount(countWords(note.content));
         setLastSaved(note.updatedAt);
         
-        // Detect if note contains code
         if (note.title.toLowerCase().includes('.html') || 
             note.title.toLowerCase().includes('.css') || 
             note.title.toLowerCase().includes('.js')) {
@@ -76,7 +84,6 @@ const Editor: React.FC<EditorProps> = ({
     };
   }, []);
 
-  // Effect to update preview when in code mode
   useEffect(() => {
     if (isCodeMode && isPreviewMode && previewRef.current) {
       updateCodePreview();
@@ -161,7 +168,6 @@ const Editor: React.FC<EditorProps> = ({
     const newTitle = e.target.value;
     setTitle(newTitle);
     
-    // Auto-detect code mode based on file extension in the title
     if (newTitle.toLowerCase().includes('.html')) {
       setIsCodeMode(true);
       setCodeLanguage("html");
@@ -240,7 +246,6 @@ const Editor: React.FC<EditorProps> = ({
       const newContent = insertTab(content, selectionStart, selectionEnd);
       setContent(newContent);
 
-      // Set cursor position
       setTimeout(() => {
         textarea.selectionStart = textarea.selectionEnd = selectionStart + 2;
       }, 0);
@@ -302,6 +307,16 @@ const Editor: React.FC<EditorProps> = ({
 
     html = html.replace(/\n/g, '<br />');
     return html;
+  };
+
+  const handleDownloadNote = (format: "txt" | "md" | "html") => {
+    if (selectedNoteId) {
+      const note = getNote(selectedNoteId);
+      if (note) {
+        downloadNote(note.title, note.content, format);
+        toast.success(`Note downloaded as ${format.toUpperCase()}`);
+      }
+    }
   };
 
   return <div className={`flex flex-col h-full relative neu-flat m-2 md:m-0 rounded-lg ${isFullScreen ? 'fixed inset-0 z-50 m-0 rounded-none bg-background' : ''}`}>
@@ -417,13 +432,79 @@ const Editor: React.FC<EditorProps> = ({
           </div>
 
           <div className="px-4 py-3">
-            <input 
-              type="text" 
-              value={title} 
-              onChange={handleTitleChange} 
-              placeholder={isCodeMode ? "Filename (e.g. index.html, styles.css, script.js)" : "Note title..."} 
-              className="w-full text-xl font-medium bg-transparent border-none outline-none focus:ring-0 px-2 py-1 rounded-lg" 
-            />
+            <div className="flex items-center justify-between">
+              <input 
+                type="text" 
+                value={title} 
+                onChange={handleTitleChange} 
+                placeholder={isCodeMode ? "Filename (e.g. index.html, styles.css, script.js)" : "Note title..."} 
+                className="w-full text-xl font-medium bg-transparent border-none outline-none focus:ring-0 px-2 py-1 rounded-lg" 
+              />
+
+              <div className="flex items-center space-x-1">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button 
+                      className="toolbar-button neu-button" 
+                      title="Manage tags"
+                      onClick={() => setShowTagManager(!showTagManager)}
+                    >
+                      <Tag size={15} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
+                    {selectedNoteId && getNote(selectedNoteId) && (
+                      <TagManager 
+                        noteId={selectedNoteId} 
+                        tags={getNote(selectedNoteId)?.tags || []} 
+                      />
+                    )}
+                  </PopoverContent>
+                </Popover>
+
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <button className="toolbar-button neu-button" title="Download note">
+                      <Download size={15} />
+                    </button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-2">
+                    <div className="space-y-2">
+                      <h3 className="text-sm font-medium">Download As</h3>
+                      <ToggleGroup type="single" value={downloadFormat} onValueChange={(value) => value && setDownloadFormat(value as "txt" | "md" | "html")}>
+                        <ToggleGroupItem value="txt" size="sm">TXT</ToggleGroupItem>
+                        <ToggleGroupItem value="md" size="sm">MD</ToggleGroupItem>
+                        <ToggleGroupItem value="html" size="sm">HTML</ToggleGroupItem>
+                      </ToggleGroup>
+                      <button 
+                        className="w-full py-1.5 px-3 rounded-lg neu-button flex items-center justify-center gap-1 text-xs"
+                        onClick={() => handleDownloadNote(downloadFormat)}
+                      >
+                        <Download size={12} />
+                        Download {downloadFormat.toUpperCase()}
+                      </button>
+                    </div>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            
+            {selectedNoteId && getNote(selectedNoteId) && (
+              <div className="mt-1 flex flex-wrap gap-1">
+                {getNote(selectedNoteId)?.tags.map(tag => (
+                  <span 
+                    key={tag.id}
+                    className="text-xs px-2 py-0.5 rounded-full"
+                    style={{ 
+                      backgroundColor: `${tag.color}20`, 
+                      color: tag.color 
+                    }}
+                  >
+                    {tag.name}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="flex-1 overflow-hidden editor-container p-2">

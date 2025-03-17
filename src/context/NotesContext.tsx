@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Folder, Note, Tag } from "@/types";
 import { sampleFolders, sampleNotes, sampleTags } from "@/utils/sampleData";
@@ -20,6 +19,9 @@ interface NotesContextType {
   deleteNote: (id: string) => void;
   addNoteToFolder: (noteId: string, folderId: string) => void;
   createFolder: (folder: Partial<Folder>) => void;
+  addTag: (tag: Partial<Tag>) => Tag;
+  removeTag: (id: string) => void;
+  getNotesWithTag: (tagId: string) => Note[];
 }
 
 const NotesContext = createContext<NotesContextType | undefined>(undefined);
@@ -27,7 +29,7 @@ const NotesContext = createContext<NotesContextType | undefined>(undefined);
 export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [notes, setNotes] = useState<Note[]>(sampleNotes);
   const [folders, setFolders] = useState<Folder[]>(sampleFolders);
-  const [tags] = useState<Tag[]>(sampleTags);
+  const [tags, setTags] = useState<Tag[]>(sampleTags);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>(sampleNotes[0]?.id || null);
   const [selectedFolderId, setSelectedFolderId] = useState<string | null>(null);
 
@@ -67,7 +69,6 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           : note
       )
     );
-    toast.success("Note updated");
   };
 
   const deleteNote = (id: string) => {
@@ -112,6 +113,37 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     toast.success("Folder created");
   };
 
+  const addTag = (tag: Partial<Tag>): Tag => {
+    const newTag: Tag = {
+      id: `tag${Date.now()}`,
+      name: tag.name || "New Tag",
+      color: tag.color || "#8B5CF6",
+    };
+    
+    setTags(prev => [...prev, newTag]);
+    toast.success(`Tag "${newTag.name}" created`);
+    return newTag;
+  };
+  
+  const removeTag = (id: string) => {
+    setNotes(prev => 
+      prev.map(note => ({
+        ...note,
+        tags: note.tags.filter(tag => tag.id !== id),
+        updatedAt: new Date()
+      }))
+    );
+    
+    setTags(prev => prev.filter(tag => tag.id !== id));
+    toast.success("Tag removed");
+  };
+  
+  const getNotesWithTag = (tagId: string) => {
+    return notes.filter(note => 
+      note.tags.some(tag => tag.id === tagId)
+    );
+  };
+
   return (
     <NotesContext.Provider 
       value={{
@@ -130,6 +162,9 @@ export const NotesProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         deleteNote,
         addNoteToFolder,
         createFolder,
+        addTag,
+        removeTag,
+        getNotesWithTag,
       }}
     >
       {children}
