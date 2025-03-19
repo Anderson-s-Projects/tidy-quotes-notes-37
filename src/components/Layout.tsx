@@ -33,6 +33,18 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
     };
   }, []);
 
+  // Handle viewport height for mobile devices
+  useEffect(() => {
+    const setVh = () => {
+      const vh = window.innerHeight * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setVh();
+    window.addEventListener('resize', setVh);
+    return () => window.removeEventListener('resize', setVh);
+  }, []);
+
   const toggleFullScreen = () => {
     if (!isFullScreen) {
       const editorElement = document.querySelector('.editor-container');
@@ -160,10 +172,10 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
           </ResizablePanelGroup>
         </div>
 
-        {/* Mobile layout - Separate drawer approach */}
-        <div className="md:hidden flex flex-col h-full w-full">
+        {/* Mobile layout - Improved for iPhone */}
+        <div className="md:hidden flex flex-col h-full w-full mobile-container">
           {/* Mobile header with buttons */}
-          <div className="flex justify-between items-center p-2 border-b border-border">
+          <div className="flex justify-between items-center p-2 border-b border-border mobile-header">
             <button 
               onClick={openSidebar}
               className="h-9 w-9 neu-button flex items-center justify-center rounded-full"
@@ -192,7 +204,7 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
           </div>
 
           {/* Main content area */}
-          <div className="flex-1 overflow-hidden">
+          <div className="flex-1 overflow-hidden mobile-content">
             <Editor 
               onMobileSidebarToggle={openSidebar}
               onMobileNotesListToggle={openNotesList}

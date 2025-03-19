@@ -46,6 +46,9 @@
     --shadow-medium-light: 0.5rem 0.5rem 1rem #c8d0e7, -0.5rem -0.5rem 1rem #ffffff;
     --shadow-large-light: 0.8rem 0.8rem 1.4rem #c8d0e7, -0.2rem -0.2rem 1.8rem #ffffff;
     --shadow-inner-light: inset 0.2rem 0.2rem 0.5rem #c8d0e7, inset -0.2rem -0.2rem 0.5rem #ffffff;
+    
+    /* iOS height fix */
+    --vh: 1vh;
   }
 
   .dark {
@@ -108,9 +111,18 @@
   }
   
   @media (max-width: 768px) {
-    body {
-      overflow: auto;
+    html, body, #root {
       height: 100%;
+      height: calc(var(--vh, 1vh) * 100);
+      position: fixed;
+      width: 100%;
+      overflow: hidden;
+    }
+    
+    /* Fix for iOS Safari */
+    body {
+      -webkit-text-size-adjust: 100%;
+      -webkit-overflow-scrolling: touch;
     }
     
     #root {
