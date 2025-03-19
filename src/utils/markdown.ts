@@ -1,63 +1,111 @@
 
 export const formatMarkdown = (content: string, type: string): string => {
-  const selection = window.getSelection();
-  if (!selection || selection.rangeCount === 0) return content;
-
-  const range = selection.getRangeAt(0);
-  const startIndex = range.startOffset;
-  const endIndex = range.endOffset;
-  const selectedText = content.substring(startIndex, endIndex);
-
-  if (selectedText.length === 0) return content;
-
+  // Get the current selection from the textarea
+  const textarea = document.activeElement as HTMLTextAreaElement;
+  if (!textarea || textarea.tagName !== 'TEXTAREA') return content;
+  
+  const selectionStart = textarea.selectionStart;
+  const selectionEnd = textarea.selectionEnd;
+  const selectedText = content.substring(selectionStart, selectionEnd);
+  
   let formattedText = "";
   let newContent = "";
+  let cursorPosition = selectionEnd;
+
+  // If there's no selection and we need to add wrapper syntax, insert a placeholder
+  const hasSelection = selectedText.length > 0;
+  const textToFormat = hasSelection ? selectedText : "text";
 
   switch (type) {
     case "bold":
-      formattedText = `**${selectedText}**`;
+      formattedText = `**${textToFormat}**`;
+      if (!hasSelection) cursorPosition = selectionStart + 2;
       break;
     case "italic":
-      formattedText = `*${selectedText}*`;
+      formattedText = `*${textToFormat}*`;
+      if (!hasSelection) cursorPosition = selectionStart + 1;
       break;
     case "heading1":
-      formattedText = `# ${selectedText}`;
+      formattedText = `# ${textToFormat}`;
+      if (!hasSelection) cursorPosition = selectionStart + 2;
       break;
     case "heading2":
-      formattedText = `## ${selectedText}`;
+      formattedText = `## ${textToFormat}`;
+      if (!hasSelection) cursorPosition = selectionStart + 3;
       break;
     case "heading3":
-      formattedText = `### ${selectedText}`;
+      formattedText = `### ${textToFormat}`;
+      if (!hasSelection) cursorPosition = selectionStart + 4;
       break;
-    case "link":
-      formattedText = `[${selectedText}](url)`;
+    case "link": {
+      if (hasSelection) {
+        formattedText = `[${textToFormat}](url)`;
+        cursorPosition = selectionEnd + 3; // Position cursor at the start of "url"
+      } else {
+        formattedText = `[text](url)`;
+        cursorPosition = selectionStart + 1; // Position cursor at the start of "text"
+      }
       break;
+    }
     case "code":
-      formattedText = `\`${selectedText}\``;
+      formattedText = `\`${textToFormat}\``;
+      if (!hasSelection) cursorPosition = selectionStart + 1;
       break;
     case "codeblock":
-      formattedText = `\`\`\`\n${selectedText}\n\`\`\``;
+      formattedText = `\`\`\`\n${textToFormat}\n\`\`\``;
+      if (!hasSelection) cursorPosition = selectionStart + 4;
       break;
-    case "quote":
-      formattedText = `> ${selectedText}`;
+    case "quote": {
+      // Handle multiline quotes
+      if (textToFormat.includes('\n')) {
+        formattedText = textToFormat
+          .split('\n')
+          .map(line => `> ${line}`)
+          .join('\n');
+      } else {
+        formattedText = `> ${textToFormat}`;
+      }
+      if (!hasSelection) cursorPosition = selectionStart + 2;
       break;
-    case "unorderedList":
-      formattedText = selectedText
-        .split("\n")
-        .map(line => `- ${line}`)
-        .join("\n");
+    }
+    case "unorderedList": {
+      if (textToFormat.includes('\n')) {
+        formattedText = textToFormat
+          .split('\n')
+          .map(line => `- ${line}`)
+          .join('\n');
+      } else {
+        formattedText = `- ${textToFormat}`;
+      }
+      if (!hasSelection) cursorPosition = selectionStart + 2;
       break;
-    case "orderedList":
-      formattedText = selectedText
-        .split("\n")
-        .map((line, index) => `${index + 1}. ${line}`)
-        .join("\n");
+    }
+    case "orderedList": {
+      if (textToFormat.includes('\n')) {
+        formattedText = textToFormat
+          .split('\n')
+          .map((line, index) => `${index + 1}. ${line}`)
+          .join('\n');
+      } else {
+        formattedText = `1. ${textToFormat}`;
+      }
+      if (!hasSelection) cursorPosition = selectionStart + 3;
       break;
+    }
     default:
-      formattedText = selectedText;
+      formattedText = textToFormat;
   }
 
-  newContent = content.substring(0, startIndex) + formattedText + content.substring(endIndex);
+  newContent = content.substring(0, selectionStart) + formattedText + content.substring(selectionEnd);
+  
+  // Set cursor position for user convenience
+  if (!hasSelection) {
+    setTimeout(() => {
+      textarea.focus();
+      textarea.setSelectionRange(cursorPosition, cursorPosition);
+    }, 0);
+  }
+  
   return newContent;
 };
 

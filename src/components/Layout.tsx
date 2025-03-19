@@ -6,6 +6,7 @@ import Editor from "./Editor";
 import { NotesProvider } from "@/context/NotesContext";
 import { useMobileNav } from "@/context/MobileNavContext";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./ui/resizable";
+import { ThemeToggle } from "./ThemeToggle";
 
 const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const { isSidebarOpen, isNotesListOpen, closePanels, openSidebar, openNotesList } = useMobileNav();
@@ -175,16 +176,19 @@ const Layout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               </svg>
             </button>
             <h1 className="text-lg font-semibold">Notes</h1>
-            <button 
-              onClick={openNotesList}
-              className="h-9 w-9 neu-button flex items-center justify-center rounded-full"
-              aria-label="Open notes list"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
-                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
-              </svg>
-            </button>
+            <div className="flex items-center gap-2">
+              <ThemeToggle />
+              <button 
+                onClick={openNotesList}
+                className="h-9 w-9 neu-button flex items-center justify-center rounded-full"
+                aria-label="Open notes list"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                  <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                </svg>
+              </button>
+            </div>
           </div>
 
           {/* Main content area */}

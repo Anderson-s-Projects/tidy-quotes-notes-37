@@ -5,6 +5,7 @@ import {
   ListOrdered, Code, Quote, Eye, Maximize, Minimize, Globe
 } from "lucide-react";
 import { ToggleGroup, ToggleGroupItem } from "../ui/toggle-group";
+import { ThemeToggle } from "../ThemeToggle";
 
 interface EditorToolbarProps {
   isCodeMode: boolean;
@@ -96,6 +97,7 @@ const EditorToolbar: React.FC<EditorToolbarProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <button 
           onClick={() => setIsPreviewMode(!isPreviewMode)} 
           className={`toolbar-button ${isPreviewMode ? 'neu-pressed' : 'neu-button'}`} 
