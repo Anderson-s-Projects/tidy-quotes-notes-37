@@ -1,4 +1,6 @@
 
+@tailwind components;
+
 @layer components {
   [data-panel-group-direction="horizontal"] > [data-panel-handle] {
     width: 6px;

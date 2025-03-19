@@ -1,4 +1,6 @@
 
+@tailwind components;
+
 @layer components {
   /* Neumorphism styles */
   .neu-flat {
