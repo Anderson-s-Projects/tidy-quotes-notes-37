@@ -1,0 +1,22 @@
+
+@layer components {
+  [data-panel-group-direction="horizontal"] > [data-panel-handle] {
+    width: 6px;
+    margin: 0;
+    background-color: var(--border);
+    transition: background-color 0.15s;
+    z-index: 10;
+  }
+
+  [data-panel-group-direction="horizontal"] > [data-panel-handle]:hover,
+  [data-panel-group-direction="horizontal"] > [data-panel-handle]:focus {
+    background-color: hsl(var(--accent));
+  }
+
+  [data-panel-group-direction="horizontal"] [data-panel-handle-spacing] {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 4px;
+  }
+}

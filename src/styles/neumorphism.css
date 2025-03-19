@@ -1,0 +1,69 @@
+
+@layer components {
+  /* Neumorphism styles */
+  .neu-flat {
+    @apply bg-background rounded-lg;
+    box-shadow: var(--shadow-small-light);
+  }
+  
+  .dark .neu-flat {
+    box-shadow: var(--shadow-small-dark);
+  }
+  
+  .neu-pressed {
+    @apply bg-background rounded-lg;
+    box-shadow: var(--shadow-inner-light);
+  }
+  
+  .dark .neu-pressed {
+    box-shadow: var(--shadow-inner-dark);
+  }
+  
+  .neu-button {
+    @apply bg-background rounded-lg transition-all duration-200;
+    box-shadow: var(--shadow-small-light);
+  }
+  
+  .neu-button:hover {
+    @apply brightness-105;
+  }
+  
+  .neu-button:active {
+    box-shadow: var(--shadow-inner-light);
+  }
+  
+  .dark .neu-button {
+    box-shadow: var(--shadow-small-dark);
+  }
+  
+  .dark .neu-button:active {
+    box-shadow: var(--shadow-inner-dark);
+  }
+  
+  .neu-input {
+    @apply bg-background rounded-lg;
+    box-shadow: var(--shadow-inner-light);
+  }
+  
+  .dark .neu-input {
+    box-shadow: var(--shadow-inner-dark);
+  }
+  
+  .neu-card {
+    @apply bg-background rounded-xl p-4;
+    box-shadow: var(--shadow-medium-light);
+  }
+  
+  .dark .neu-card {
+    box-shadow: var(--shadow-medium-dark);
+  }
+  
+  .sidebar-toggle-button {
+    @apply absolute top-1/2 -right-3 transform -translate-y-1/2 bg-background rounded-full h-6 w-6 flex items-center justify-center z-10;
+    box-shadow: var(--shadow-small-light);
+  }
+  
+  .dark .sidebar-toggle-button {
+    box-shadow: var(--shadow-small-dark);
+  }
+}

@@ -1,0 +1,64 @@
+
+@layer components {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/30;
+  }
+
+  .tag {
+    @apply inline-flex items-center text-xs px-2 py-0.5 rounded-full font-medium;
+  }
+  
+  .editor-content {
+    @apply px-4 py-2 h-full w-full;
+    max-width: none;
+  }
+  
+  .note-content {
+    width: 100%;
+  }
+  
+  [data-panel] {
+    @apply flex overflow-auto;
+  }
+  
+  .toolbar-button {
+    @apply h-8 w-8 p-0 rounded-md;
+  }
+  
+  /* Mobile specific styles */
+  @media (max-width: 768px) {
+    .editor-content {
+      @apply px-3 py-2;
+    }
+    
+    .neu-card {
+      @apply p-3;
+    }
+  }
+  
+  /* Code editor styles */
+  .code-editor-container {
+    @apply flex flex-col md:flex-row h-full;
+  }
+  
+  .code-editor {
+    @apply font-mono text-sm;
+  }
+  
+  .code-preview {
+    @apply rounded-xl overflow-hidden border border-border;
+  }
+}
