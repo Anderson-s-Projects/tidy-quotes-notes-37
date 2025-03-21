@@ -9,7 +9,7 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
-  // Ensure correct base path for GitHub Pages
+  // Ensure the base path is set correctly for GitHub Pages
   base: mode === "production" ? "/tidy-quotes-notes-37/" : "/",
   plugins: [
     react(),
